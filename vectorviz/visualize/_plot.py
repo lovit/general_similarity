@@ -36,12 +36,6 @@ def ipython_3d_scatter(X, color, text=None,
             t=100,
             pad=4
         ),
-        xaxis = dict(
-            domain = [0, 1]
-        )
-        yaxis = dict(
-            domain = [0, 1]
-        )
         #paper_bgcolor='#7f7f7f',
         #plot_bgcolor='#c7c7c7'
     )
