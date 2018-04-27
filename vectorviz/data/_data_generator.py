@@ -96,8 +96,8 @@ def make_spiral(n_samples_per_class=100, n_classes=2,
     for c in range(n_classes):
 
         t_shift = theta[c]
-        x_shift = gap_betweein_start_point * np.cos(t_shift)
-        y_shift = gap_betweein_start_point * np.sin(t_shift)
+        x_shift = gap_between_start_point * np.cos(t_shift)
+        y_shift = gap_between_start_point * np.sin(t_shift)
 
         if equal_interval:
             t = n_rotations * np.pi * (2 * generator.rand(1, n_samples_per_class) ** (1/2))
