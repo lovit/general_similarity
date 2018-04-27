@@ -163,3 +163,80 @@ def make_swiss_roll(n_samples=100, n_rotations=1.5,
     color = (t - t.min()) / (t.max() - t.min())
 
     return X, color
+
+def make_radial(n_samples_per_sections=100, n_classes=2, 
+        n_sections_per_class=3, gap=0.0, equal_proportion=True,
+        radious_min=0.1, radious_base=1.0, radius_variance=0.0):
+
+    """Parameters
+    ----------
+    n_samples_per_class : int, optional (default=100)
+        The number of points of a class.
+    n_classes : int, optional (default=2)
+        The number of spiral
+    n_sections_per_class : int, optional (default=3)
+        The number of sections of each class
+    gap : float, optional (default=0.0)
+        The gap between adjacent sections
+        It should be bounded in [0, 1)
+    equal_proportion : Boolean, optional (default=True)
+        Equal maximum radious for each section
+    radious_min : float, optional (default=0.1)
+        Minimum radious of a point
+    radious_base : float, optional (default=1.0)
+        Average radious of points in a section
+    radius_variance : float, optional (default=0.0)
+        Variance in maximum radius of sections
+    Returns
+    -------
+    X : array of shape [n_samples, 2]
+        The generated samples.
+    color : array of shape [n_samples, n_classes]
+        The integer labels for class membership of each sample.
+    """
+
+    assert 0 <= gap < 1
+
+    generator = check_random_state(None)
+    
+    if equal_proportion:
+        theta = 2 * np.pi * np.linspace(
+            0, 1, n_classes * n_sections_per_class + 1)
+    else:
+        theta = np.cumsum(np.linspace(
+            0, 1, n_classes * n_sections_per_class + 1))
+        theta = 2 * np.pi * (theta - theta[0]) / (theta[-1] - theta[0])
+
+    radius = radious_base * (1 + radius_variance * generator.rand(
+        1, n_sections_per_class * n_classes).reshape(-1))
+
+    X_array = []
+    color_array = []
+
+    # for each section
+    for s in range(n_sections_per_class * n_classes):
+        t_begin = theta[s]
+        t_end = theta[s+1]
+        if gap > 0:
+            t_begin += (t_end - t_begin) * gap
+            t_end -= (t_end - t_begin) * gap
+        
+        t = t_begin + (t_end - t_begin) * generator.rand(
+            1, n_samples_per_sections)
+        r = np.diag(radious_min + radius[s] * (generator.rand(
+            1, n_samples_per_sections) ** (1/2))[0])
+        x = np.cos(t)
+        y = np.sin(t)
+        X = np.concatenate((x, y))
+        X = X.dot(r)
+        X = X.T
+        
+        color = np.asarray([s % n_sections_per_class]
+                           * n_samples_per_sections)
+        
+        X_array.append(X)
+        color_array.append(color)
+    
+    X = np.concatenate(X_array)
+    color = np.concatenate(color_array)
+    return X, color
