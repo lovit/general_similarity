@@ -166,7 +166,7 @@ def make_swiss_roll(n_samples=100, n_rotations=1.5,
 
 def make_radial(n_samples_per_sections=100, n_classes=2, 
         n_sections_per_class=3, gap=0.0, equal_proportion=True,
-        radious_min=0.1, radious_base=1.0, radius_variance=0.0):
+        radius_min=0.1, radius_base=1.0, radius_variance=0.0):
 
     """Parameters
     ----------
@@ -180,11 +180,11 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
         The gap between adjacent sections
         It should be bounded in [0, 1)
     equal_proportion : Boolean, optional (default=True)
-        Equal maximum radious for each section
-    radious_min : float, optional (default=0.1)
-        Minimum radious of a point
-    radious_base : float, optional (default=1.0)
-        Average radious of points in a section
+        Equal maximum radius for each section
+    radius_min : float, optional (default=0.1)
+        Minimum radius of a point
+    radius_base : float, optional (default=1.0)
+        Average radius of points in a section
     radius_variance : float, optional (default=0.0)
         Variance in maximum radius of sections
     Returns
@@ -207,7 +207,7 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
             0, 1, n_classes * n_sections_per_class + 1))
         theta = 2 * np.pi * (theta - theta[0]) / (theta[-1] - theta[0])
 
-    radius = radious_base * (1 + radius_variance * generator.rand(
+    radius = radius_base * (1 + radius_variance * generator.rand(
         1, n_sections_per_class * n_classes).reshape(-1))
 
     X_array = []
@@ -223,7 +223,7 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
         
         t = t_begin + (t_end - t_begin) * generator.rand(
             1, n_samples_per_sections)
-        r = np.diag(radious_min + radius[s] * (generator.rand(
+        r = np.diag(radius_min + radius[s] * (generator.rand(
             1, n_samples_per_sections) ** (1/2))[0])
         x = np.cos(t)
         y = np.sin(t)
