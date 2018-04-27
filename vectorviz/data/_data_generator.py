@@ -58,7 +58,7 @@ def make_moons(n_samples=100,
 
 def make_spiral(n_samples_per_class=100, n_classes=2,
         n_rotations=3, gap_between_spiral=0.0, 
-        gap_betweein_start_point=0.0, equal_interval=True,                
+        gap_between_start_point=0.0, equal_interval=True,                
         noise=None):
 
     """Parameters
@@ -90,22 +90,34 @@ def make_spiral(n_samples_per_class=100, n_classes=2,
 
     generator = check_random_state(None)
 
-    if equal_interval:
-        t = n_rotations * np.pi * (2 * generator.rand(1, n_samples_per_class) ** (1/2))
-    else:
-        t = n_rotations * np.pi * (2 * generator.rand(1, n_samples_per_class))
+    X_array = []
+    theta = 2 * np.pi * np.linspace(0, 1, n_classes + 1)[:n_classes]
 
-    x = (1 + gap_between_spiral) * t * np.cos(t)
-    y = (1 + gap_between_spiral) * t * np.sin(t)
+    for c in range(n_classes):
 
-    X = np.concatenate((x, y))
+        t_shift = theta[c]
+        x_shift = gap_betweein_start_point * np.cos(t_shift)
+        y_shift = gap_betweein_start_point * np.sin(t_shift)
 
-    if noise is not None:
-        X += generator.normal(scale=noise, size=X.shape)
+        if equal_interval:
+            t = n_rotations * np.pi * (2 * generator.rand(1, n_samples_per_class) ** (1/2))
+        else:
+            t = n_rotations * np.pi * (2 * generator.rand(1, n_samples_per_class))
 
-    X = X.T
-    
-    color = np.asarray([0] * n_samples_per_class)
+        x = (1 + gap_between_spiral) * t * np.cos(t + t_shift) + x_shift
+        y = (1 + gap_between_spiral) * t * np.sin(t + t_shift) + y_shift
+
+        X = np.concatenate((x, y))
+
+        if noise is not None:
+            X += generator.normal(scale=noise, size=X.shape)
+        
+        X = X.T
+        X_array.append(X)
+
+    X = np.concatenate(X_array)
+    color = np.asarray([c for c in range(n_classes) for _ in range(n_samples_per_class)])
+
     return X, color
 
 def make_swiss_roll(n_samples=100, n_rotations=1.5, 
