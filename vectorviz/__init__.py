@@ -1,7 +1,12 @@
 __author__ = 'lovit'
 
-from . import metric
+from . import data
 from . import embedding
+from . import metric
+from . import visualize
 
-__all__ = ['metric',
-           'embedding']
+__all__ = ['data',
+           'embedding',
+           'metric',
+           'visualize'
+          ]
