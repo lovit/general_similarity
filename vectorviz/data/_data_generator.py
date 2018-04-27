@@ -197,8 +197,6 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
 
     assert 0 <= gap < 1
 
-    generator = check_random_state(None)
-    
     if equal_proportion:
         theta = 2 * np.pi * np.linspace(
             0, 1, n_classes * n_sections_per_class + 1)
@@ -207,8 +205,8 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
             0, 1, n_classes * n_sections_per_class + 1))
         theta = 2 * np.pi * (theta - theta[0]) / (theta[-1] - theta[0])
 
-    radius = radius_base * (1 + radius_variance * generator.rand(
-        1, n_sections_per_class * n_classes).reshape(-1))
+    radius = radius_base * (1 + radius_variance * np.random.rand(
+        n_sections_per_class * n_classes).reshape(-1))
 
     X_array = []
     color_array = []
@@ -221,9 +219,9 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
             t_begin += (t_end - t_begin) * gap
             t_end -= (t_end - t_begin) * gap
         
-        t = t_begin + (t_end - t_begin) * generator.rand(
+        t = t_begin + (t_end - t_begin) * np.random.rand(
             1, n_samples_per_sections)
-        r = np.diag(radius_min + radius[s] * (generator.rand(
+        r = np.diag(radius_min + radius[s] * (np.random.rand(
             1, n_samples_per_sections) ** (1/2))[0])
         x = np.cos(t)
         y = np.sin(t)
@@ -239,4 +237,42 @@ def make_radial(n_samples_per_sections=100, n_classes=2,
     
     X = np.concatenate(X_array)
     color = np.concatenate(color_array)
+    return X, color
+
+def make_two_layer_radial(n_samples_per_sections=100, n_classes=2, 
+        n_sections_per_class=3, gap=0.0, equal_proportion=True):
+
+    """Parameters
+    ----------
+    n_samples_per_class : int, optional (default=100)
+        The number of points of a class.
+    n_classes : int, optional (default=2)
+        The number of spiral
+    n_sections_per_class : int, optional (default=3)
+        The number of sections of each class
+    gap : float, optional (default=0.0)
+        The gap between adjacent sections
+        It should be bounded in [0, 1)
+    equal_proportion : Boolean, optional (default=True)
+        Equal maximum radius for each section
+    Returns
+    -------
+    X : array of shape [n_samples, 2]
+        The generated samples.
+    color : array of shape [n_samples, n_classes]
+        The integer labels for class membership of each sample.
+    """
+
+    X_0, color_0 = make_radial(
+        n_samples_per_sections, n_classes, n_sections_per_class,
+        gap, equal_proportion, radius_min=0.1, radius_base=1)
+    X_1, color_1 = make_radial(
+        n_samples_per_sections, n_classes, n_sections_per_class,
+        gap, equal_proportion, radius_min=1 * (1 + gap), radius_base=1)
+
+    color_1[:-n_samples_per_sections] = color_1[n_samples_per_sections:]
+    color_1[-n_samples_per_sections:] = 0
+
+    X = np.concatenate((X_0, X_1))
+    color = np.concatenate((color_0, color_1))
     return X, color
